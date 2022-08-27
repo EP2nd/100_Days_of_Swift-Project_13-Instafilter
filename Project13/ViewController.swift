@@ -12,6 +12,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     @IBOutlet var imageView: UIImageView!
     @IBOutlet var intensity: UISlider!
+    @IBOutlet var changeFilterButton: UIButton!
     
     var currentImage: UIImage!
     var context: CIContext!
@@ -25,9 +26,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         context = CIContext()
         currentFilter = CIFilter(name: "CISepiaTone")
+        changeFilterButton.setTitle("\(currentFilter.name)", for: .normal)
     }
     
     @IBAction func changeFilter(_ sender: Any) {
+        
         let alertController = UIAlertController(title: "Choose filter", message: nil, preferredStyle: .actionSheet)
         alertController.addAction(UIAlertAction(title: "CIBumpDistortion", style: .default, handler: setFilter))
         alertController.addAction(UIAlertAction(title: "CIGaussianBlur", style: .default, handler: setFilter))
@@ -42,7 +45,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     @IBAction func save(_ sender: Any) {
-        guard let image = imageView.image else { return }
+        guard let image = imageView.image else {
+            let alertController = UIAlertController(title: "Error", message: "There is no image to save.", preferredStyle: .alert)
+            alertController.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alertController, animated: true)
+            
+            return
+        }
         
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
     }
@@ -98,6 +107,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         // Safely read the alert action's title.
         guard let actionTitle = action.title else { return }
+        
+        changeFilterButton.setTitle("\(actionTitle)", for: .normal)
         
         currentFilter = CIFilter(name: actionTitle)
         

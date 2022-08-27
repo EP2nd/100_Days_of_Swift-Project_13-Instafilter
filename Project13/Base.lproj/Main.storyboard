@@ -93,6 +93,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="1P7-03-UON"/>
                     <connections>
+                        <outlet property="changeFilterButton" destination="XPa-l5-FCR" id="GGC-Yr-zWh"/>
                         <outlet property="imageView" destination="htc-mi-9OO" id="Sj6-fC-vEF"/>
                         <outlet property="intensity" destination="DT3-i9-3op" id="cYl-fF-mHy"/>
                     </connections>
