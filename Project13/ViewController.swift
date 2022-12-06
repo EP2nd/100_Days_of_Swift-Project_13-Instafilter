@@ -5,13 +5,13 @@
 //  Created by Edwin Przeźwiecki Jr. on 24/08/2022.
 //
 
-import UIKit
 import CoreImage
+import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     @IBOutlet var imageView: UIImageView!
-    
+    /// Challenge 3:
     @IBOutlet var intensity: UISlider!
     @IBOutlet var intensityLabel: UILabel!
     
@@ -29,16 +29,21 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     var currentImage: UIImage!
     var context: CIContext!
     var currentFilter: CIFilter!
+    
     var filters = ["CIBumpDistortion", "CIGaussianBlur", "CIPixellate", "CISepiaTone", "CITwirlDistortion", "CIUnsharpMask", "CIVignette"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         title = "Instafilter"
+        
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(importPicture))
         
         context = CIContext()
+        
         currentFilter = CIFilter(name: "CISepiaTone")
+        
+        /// Challenge 2:
         changeFilterButton.setTitle("\(currentFilter.name)", for: .normal)
     }
     
@@ -49,15 +54,21 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         for filter in filters {
             alertController.addAction(UIAlertAction(title: filter, style: .default, handler: setFilter))
         }
+        
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         
         present(alertController, animated: true)
     }
     
     @IBAction func save(_ sender: Any) {
+        
+        /// Challenge 1:
         guard let image = imageView.image else {
+            
             let alertController = UIAlertController(title: "Error", message: "There is no image to save.", preferredStyle: .alert)
+            
             alertController.addAction(UIAlertAction(title: "OK", style: .default))
+            
             present(alertController, animated: true)
             
             return
@@ -66,6 +77,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
     }
     
+    /// Challenge 3:
     @IBAction func intensityChanged(_ sender: Any) {
         applyProcessing()
     }
@@ -83,26 +95,31 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     @objc func importPicture() {
+        
         let picker = UIImagePickerController()
+        
         picker.allowsEditing = true
         picker.delegate = self
+        
         present(picker, animated: true)
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        
         guard let image = info[.editedImage] as? UIImage else { return }
         
         dismiss(animated: true)
         
         currentImage = image
         
-        // Project_15-Challenge_2:
+        /// Project 15, challenge 2:
         UIView.animate(withDuration: 1, animations: {
             self.imageView.alpha = 0
             self.imageView.alpha = 1
         })
         
         let beginImage = CIImage(image: currentImage)
+        
         currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
         
         applyProcessing()
@@ -110,11 +127,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     func applyProcessing() {
         
-        //guard let image = currentFilter.outputImage else { return }
-        //currentFilter.setValue(intensity.value, forKey: kCIInputIntensityKey)
+//      guard let image = currentFilter.outputImage else { return }
+//      currentFilter.setValue(intensity.value, forKey: kCIInputIntensityKey)
         
         let inputKeys = currentFilter.inputKeys
         
+        /// Challenge 3:
         DispatchQueue.main.async {
             if inputKeys.contains(kCIInputIntensityKey) {
                 self.intensity.isEnabled = true
@@ -159,23 +177,27 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         } */
         
         if let cgimg = context.createCGImage(currentFilter.outputImage!, from: currentFilter.outputImage!.extent) {
+            
             let processedImage = UIImage(cgImage: cgimg)
+            
             self.imageView.image = processedImage
         }
     }
     
     func setFilter(action: UIAlertAction) {
-        // Making sure there is a valid image before continuing.
+        /// Making sure there is a valid image before continuing:
         guard currentImage != nil else { return }
         
-        // Safely read the alert action's title.
+        /// Safely read the alert action's title:
         guard let actionTitle = action.title else { return }
         
+        /// Challenge 2:
         changeFilterButton.setTitle("\(actionTitle)", for: .normal)
         
         currentFilter = CIFilter(name: actionTitle)
         
         let beginImage = CIImage(image: currentImage)
+        
         currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
         
         applyProcessing()
@@ -183,13 +205,18 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let error = error {
-            // We got back an error.
+            /// We got back an error:
             let alertController = UIAlertController(title: "Save error", message: error.localizedDescription, preferredStyle: .alert)
+            
             alertController.addAction(UIAlertAction(title: "OK", style: .default))
+            
             present(alertController, animated: true)
         } else {
+            
             let alertController = UIAlertController(title: "Saved!", message: "Your altered image has been saved to your photo library.", preferredStyle: .alert)
+            
             alertController.addAction(UIAlertAction(title: "OK", style: .default))
+            
             present(alertController, animated: true)
         }
     }
